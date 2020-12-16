@@ -1,0 +1,30 @@
+#!bin/sh
+
+BUCKET_NAME=
+CIDR_Block=
+PUBLIC_SUBNET_CIDR=
+PRIVATE_SUBNET_CIDR=
+AVAILABILITY_ZONE=
+INSTACE_TYPE=
+SSH_KEY=
+
+# 通常ならenvをgithub secretで保持しgithub actionsでデプロイ
+
+aws s3 sync application/ s3://${BUCKET_NAME}/application
+aws s3 sync network/ s3://${BUCKET_NAME}/network
+aws s3 sync security/ s3://${BUCKET_NAME}/security
+aws s3 cp ./root.yml s3://${BUCKET_NAME}/
+
+aws --region eu-west-2 \
+    cloudformation deploy \
+    --stack-name test-template-root-stack \
+    --template-file root.yml \
+    --parameter-overrides \
+        BucketName=${BUCKET_NAME} \
+        CIDRBlock=${CIDR_Block} \
+        PublicSubnetCIDR=${PUBLIC_SUBNET_CIDR} \
+        PrivateSubnetCIDR=${PRIVATE_SUBNET_CIDR} \
+        AvailabilityZone=${AVAILABILITY_ZONE} \
+        InstanceType=${INSTACE_TYPE} \
+        SSHKey=${SSH_KEY}
+
