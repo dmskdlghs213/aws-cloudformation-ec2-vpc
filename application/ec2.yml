@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: setting ec2
+
+Parameters:
+  InstanceType:
+    Type: String
+
+  SSHKey:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: SSH public key
+
+  SecurityGroupId:
+    Type: String
+
+  SubnetID:
+    Type: String
+
+Resources:
+  TestEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-08b993f76f42c3e2f 
+      InstanceType: !Sub ${InstanceType}
+      KeyName: !Sub ${SSHKey}
+      SubnetId: !Sub ${SubnetID}
+      SecurityGroupIds: 
+        - !Sub ${SecurityGroupId}
+      
