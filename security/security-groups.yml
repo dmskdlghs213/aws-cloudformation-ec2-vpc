@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: setting security groups
+
+Parameters:
+  VPCID: 
+    Type: String
+
+Resources:
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Sub ${VPCID}
+      GroupDescription: SecurityGroup for EC2
+      SecurityGroupIngress:
+         - CidrIp: 0.0.0.0/0
+           IpProtocol: tcp
+           FromPort: 22
+           ToPort: 22
+      Tags:
+        - Key: Name
+          Value: ec2-security-group
+
+Outputs:
+  EC2SecurityGroup:
+    Value: !Ref EC2SecurityGroup
+    Export:
+      Name: ec2-security-group
