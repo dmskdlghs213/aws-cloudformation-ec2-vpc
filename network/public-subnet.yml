@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: setting public subnet
+
+Parameters:
+  VPCID:
+    Type: String
+
+  GatewayID:
+    Type: String
+
+  PublicSubnetCIDR:
+    Type: String
+
+  AvailabilityZone:
+    Type: String
+
+Resources:
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub ${AvailabilityZone}
+      MapPublicIpOnLaunch: true
+      CidrBlock: !Sub ${PublicSubnetCIDR}
+      VpcId: !Sub ${VPCID}
+      Tags:
+        - Key: Name
+          Value: test-public-subnet
+
+  PublicRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Sub ${VPCID}
+      Tags:
+        - Key: Name
+          Value: "test-public-route-table"
+  
+  PublicRoute:
+    Type: "AWS::EC2::Route"
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      GatewayId: !Sub ${GatewayID}
+      DestinationCidrBlock: 0.0.0.0/0 
+
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable 
+
+Outputs:
+  PublicSubnet:
+    Value: !Ref PublicSubnet
+    Export:
+      Name: test-public-subnet

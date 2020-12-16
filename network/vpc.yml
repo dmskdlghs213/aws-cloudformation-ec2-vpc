@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: setting VPC
+
+Parameters:
+  CIDRBlock:
+    Type: String
+
+Resources:
+  TestVPC:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: !Sub ${CIDRBlock}
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: test-VPC
+          
+Outputs:
+  VPC:
+    Value: !Ref TestVPC
+    Export:
+      Name: test-VPC
+  

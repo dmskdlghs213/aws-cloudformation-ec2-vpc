@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: setting internet gateway
+
+Parameters:
+  VPCID:
+    Type: String
+
+Resources:
+  TESTGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: test-IG
+
+  InternetGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref TESTGateway
+      VpcId: !Sub ${VPCID}
+
+Outputs:
+  InternetGateway:
+    Value: !Ref TESTGateway
+    Export:
+      Name: test-IG

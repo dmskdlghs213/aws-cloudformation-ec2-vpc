@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: setting private subnet
+
+Parameters:
+  VPCID:
+    Type: String
+  
+  PrivateSubnetCIDR:
+    Type: String
+
+  AvailabilityZone:
+    Type: String
+
+Resources:
+  PrivateSubnet:
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: !Sub ${AvailabilityZone}
+        VpcId: !Sub ${VPCID}
+        CidrBlock: !Sub ${PrivateSubnetCIDR}
+        Tags:
+          - Key: Name
+            Value: test-private-subnet
+  
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Sub ${VPCID}
+      Tags:
+        - Key: Name
+          Value: test-private-route-table
+
+  PrivateSubnetRouteTableAssociationA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet
+      RouteTableId: !Ref PrivateRouteTable

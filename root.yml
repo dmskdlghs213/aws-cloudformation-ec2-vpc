@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Root Stack
+
+Parameters:
+  BucketName:
+    Type: String
+  
+  CIDRBlock:
+    Type: String
+
+  PublicSubnetCIDR:
+    Type: String
+
+  PrivateSubnetCIDR:
+    Type: String
+
+  AvailabilityZone:
+    Type: String
+
+  InstanceType:
+    Type: String
+
+  SSHKey:
+    Type: AWS::EC2::KeyPair::KeyName
+
+Resources:
+  VPC:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${BucketName}.s3-ap-northeast-1.amazonaws.com/network/vpc.yml
+      Parameters:
+        CIDRBlock: !Sub ${CIDRBlock}
+
+  InternetGateway:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${BucketName}.s3-ap-northeast-1.amazonaws.com/network/internet-gateway.yml
+      Parameters:
+        VPCID: !GetAtt VPC.Outputs.VPC
+
+  PublicSubnet:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${BucketName}.s3-ap-northeast-1.amazonaws.com/network/public-subnet.yml
+      Parameters:
+        VPCID: !GetAtt VPC.Outputs.VPC
+        GatewayID: !GetAtt InternetGateway.Outputs.InternetGateway
+        PublicSubnetCIDR: !Sub ${PublicSubnetCIDR}
+        AvailabilityZone: !Sub ${AvailabilityZone}
+
+  PrivateSubnet:
+     Type: AWS::CloudFormation::Stack
+     Properties:
+      TemplateURL: !Sub https://${BucketName}.s3-ap-northeast-1.amazonaws.com/network/private-subnet.yml
+      Parameters:
+        VPCID: !GetAtt VPC.Outputs.VPC
+        PrivateSubnetCIDR: !Sub ${PrivateSubnetCIDR}
+        AvailabilityZone: !Sub ${AvailabilityZone}
+
+  EC2SecurityGroup:
+     Type: AWS::CloudFormation::Stack
+     Properties:
+      TemplateURL: !Sub https://${BucketName}.s3-ap-northeast-1.amazonaws.com/security/security-groups.yml
+      Parameters:
+        VPCID: !GetAtt VPC.Outputs.VPC
+
+  EC2:
+     Type: AWS::CloudFormation::Stack
+     Properties:
+      TemplateURL: !Sub https://${BucketName}.s3-ap-northeast-1.amazonaws.com/application/ec2.yml
+      Parameters:
+        InstanceType: !Sub ${InstanceType}
+        SSHKey: !Sub ${SSHKey}
+        SecurityGroupId: !GetAtt EC2SecurityGroup.Outputs.EC2SecurityGroup
+        SubnetID: !GetAtt PublicSubnet.Outputs.PublicSubnet
